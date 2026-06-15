@@ -6,6 +6,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { validate, reviewDecision, nextField } from "../lib/agent/nodes.ts";
+import { buildGraph } from "../lib/agent/graph.ts";
 import type { Extracted, IntakeStateType } from "../lib/agent/state.ts";
 
 /** Build a full state with sensible defaults, overridden by `p`. */
@@ -122,4 +123,14 @@ test("name: 'yes' at confirmation commits the pending name", () => {
 test("review: a plain 'yes' books immediately (no model call)", async () => {
   const r = await reviewDecision(st({ status: "reviewing", userInput: "yes, that's correct" }));
   assert.equal(r.decision, "submit");
+});
+
+test("after booking, a reply ends with a farewell — no re-asking a field", async () => {
+  const graph = buildGraph();
+  const res = await graph.invoke(
+    st({ status: "confirmed", currentField: "patientType", userInput: "no", confirmation: "CLN-123", form: { fullName: "John Doe" } }),
+  );
+  assert.equal(res.status, "done");
+  assert.doesNotMatch(res.assistantMessage ?? "", /new patient|date of birth|phone|reason for/i);
+  assert.match(res.assistantMessage ?? "", /take care|all set|booked/i);
 });

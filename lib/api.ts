@@ -35,7 +35,9 @@ export async function chatTurn(body: { state?: IntakeStateType; userInput?: stri
   return {
     state: next,
     message: next.assistantMessage,
-    done: next.status === "confirmed",
+    // "done" = the conversation has ended (after the post-booking farewell), so
+    // the client can stop listening. Booking itself is signalled by confirmation.
+    done: next.status === "done",
     confirmation: next.confirmation ?? null,
   };
 }

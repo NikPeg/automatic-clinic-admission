@@ -9,7 +9,7 @@ import type { PartialIntake } from "../schema.ts";
 export type Role = "user" | "assistant" | "system";
 export type Msg = { role: Role; content: string };
 
-export type Status = "collecting" | "reviewing" | "confirmed";
+export type Status = "collecting" | "reviewing" | "confirmed" | "done";
 
 export type ClarifyKind =
   | "spell_name"

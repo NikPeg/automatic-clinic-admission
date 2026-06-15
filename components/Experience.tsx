@@ -298,6 +298,11 @@ export function Experience() {
       setLines((p) => [...p, { role: "assistant", text: data.message }]);
       if (data.confirmation) setConfirmation(data.confirmation);
       await speak(data.message);
+      // Conversation ended (post-booking farewell) → stop listening.
+      if (data.done) {
+        teardownLive();
+        setMode("idle");
+      }
     } catch {
       if (sessionRef.current) setStatus("listening");
     }

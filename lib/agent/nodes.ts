@@ -552,6 +552,19 @@ export async function reviewDecision(state: IntakeStateType): Promise<Partial<In
   return { decision: "reask", assistantMessage: msg, messages: [asMsg(msg)] };
 }
 
+/**
+ * After the booking is confirmed, the assistant has asked "anything else?".
+ * Any reply here ends the conversation gracefully — no re-asking of fields.
+ */
+export function farewell(state: IntakeStateType): Partial<IntakeStateType> {
+  const wantsMore = parseYesNo(state.userInput ?? "") === true;
+  const first = firstNameOf(state.form.fullName);
+  const msg = wantsMore
+    ? "Your appointment is booked. For anything else, please give the clinic a call. Take care!"
+    : `You're all set${first ? `, ${first}` : ""} — your appointment is confirmed. Take care, and see you soon!`;
+  return { status: "done", assistantMessage: msg, messages: [asMsg(msg)] };
+}
+
 export function submit(state: IntakeStateType): Partial<IntakeStateType> {
   const code = "CLN-" + Math.random().toString(36).slice(2, 8).toUpperCase();
   const first = firstNameOf(state.form.fullName);

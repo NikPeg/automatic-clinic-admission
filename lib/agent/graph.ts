@@ -6,9 +6,11 @@
  */
 import { START, END, StateGraph } from "@langchain/langgraph";
 import { IntakeState, type IntakeStateType } from "./state.ts";
-import { nextField, greet, extract, validate, advance, review, reviewDecision, submit } from "./nodes.ts";
+import { nextField, greet, extract, validate, advance, review, reviewDecision, submit, farewell } from "./nodes.ts";
 
-function entryRouter(state: IntakeStateType): "greet" | "extract" | "reviewDecision" {
+function entryRouter(state: IntakeStateType): "greet" | "extract" | "reviewDecision" | "farewell" {
+  // Booking already done → any reply just closes the conversation.
+  if (state.status === "confirmed" || state.status === "done") return "farewell";
   if (state.status === "reviewing") return "reviewDecision";
   if (state.userInput == null || state.currentField == null) return "greet";
   return "extract";
@@ -32,11 +34,14 @@ export function buildGraph() {
     .addNode("review", review)
     .addNode("reviewDecision", reviewDecision)
     .addNode("submit", submit)
+    .addNode("farewell", farewell)
     .addConditionalEdges(START, entryRouter, {
       greet: "greet",
       extract: "extract",
       reviewDecision: "reviewDecision",
+      farewell: "farewell",
     })
+    .addEdge("farewell", END)
     .addEdge("greet", END)
     .addEdge("extract", "validate")
     .addConditionalEdges("validate", validateRouter, { advance: "advance", end: END })
