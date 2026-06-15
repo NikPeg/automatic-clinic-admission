@@ -1,0 +1,211 @@
+{
+  "voices": {
+    "assistant": "Kore",
+    "patient": "Puck"
+  },
+  "confirmation": "CLN-K94SDO",
+  "steps": [
+    {
+      "speaker": "assistant",
+      "text": "Hi! I'll help you book your appointment, and I'll just ask a few quick questions. What's your full name?",
+      "audio": "00-assistant.wav",
+      "form": {}
+    },
+    {
+      "speaker": "patient",
+      "text": "Nikita Petrov",
+      "audio": "01-patient.wav",
+      "form": {}
+    },
+    {
+      "speaker": "assistant",
+      "text": "Thanks, Nikita! What brings you in today — what's the reason for your visit?",
+      "audio": "02-assistant.wav",
+      "form": {
+        "fullName": "Nikita Petrov"
+      }
+    },
+    {
+      "speaker": "patient",
+      "text": "I've had a bad headache for about three days",
+      "audio": "03-patient.wav",
+      "form": {
+        "fullName": "Nikita Petrov"
+      }
+    },
+    {
+      "speaker": "assistant",
+      "text": "Got it. What's your date of birth?",
+      "audio": "04-assistant.wav",
+      "form": {
+        "fullName": "Nikita Petrov",
+        "reasonForVisit": "Headache"
+      }
+    },
+    {
+      "speaker": "patient",
+      "text": "June 2nd, 2002",
+      "audio": "05-patient.wav",
+      "form": {
+        "fullName": "Nikita Petrov",
+        "reasonForVisit": "Headache"
+      }
+    },
+    {
+      "speaker": "assistant",
+      "text": "Got it. Is the phone you're calling from the best way to reach you?",
+      "audio": "06-assistant.wav",
+      "form": {
+        "fullName": "Nikita Petrov",
+        "reasonForVisit": "Headache",
+        "dob": "06/02/2002"
+      }
+    },
+    {
+      "speaker": "patient",
+      "text": "yes, this phone is fine",
+      "audio": "07-patient.wav",
+      "form": {
+        "fullName": "Nikita Petrov",
+        "reasonForVisit": "Headache",
+        "dob": "06/02/2002"
+      }
+    },
+    {
+      "speaker": "assistant",
+      "text": "Got it. What day would you like to come in?",
+      "audio": "08-assistant.wav",
+      "form": {
+        "fullName": "Nikita Petrov",
+        "reasonForVisit": "Headache",
+        "dob": "06/02/2002",
+        "mobilePhone": "(415) 555-0142"
+      }
+    },
+    {
+      "speaker": "patient",
+      "text": "next Friday",
+      "audio": "09-patient.wav",
+      "form": {
+        "fullName": "Nikita Petrov",
+        "reasonForVisit": "Headache",
+        "dob": "06/02/2002",
+        "mobilePhone": "(415) 555-0142"
+      }
+    },
+    {
+      "speaker": "assistant",
+      "text": "You'd like to come in on Friday, June 26, 2026 — is that right?",
+      "audio": "10-assistant.wav",
+      "form": {
+        "fullName": "Nikita Petrov",
+        "reasonForVisit": "Headache",
+        "dob": "06/02/2002",
+        "mobilePhone": "(415) 555-0142"
+      }
+    },
+    {
+      "speaker": "patient",
+      "text": "yes",
+      "audio": "11-patient.wav",
+      "form": {
+        "fullName": "Nikita Petrov",
+        "reasonForVisit": "Headache",
+        "dob": "06/02/2002",
+        "mobilePhone": "(415) 555-0142"
+      }
+    },
+    {
+      "speaker": "assistant",
+      "text": "Got it. Do you have health insurance?",
+      "audio": "12-assistant.wav",
+      "form": {
+        "fullName": "Nikita Petrov",
+        "reasonForVisit": "Headache",
+        "dob": "06/02/2002",
+        "mobilePhone": "(415) 555-0142",
+        "preferredDate": "06/26/2026"
+      }
+    },
+    {
+      "speaker": "patient",
+      "text": "no, I don't have insurance",
+      "audio": "13-patient.wav",
+      "form": {
+        "fullName": "Nikita Petrov",
+        "reasonForVisit": "Headache",
+        "dob": "06/02/2002",
+        "mobilePhone": "(415) 555-0142",
+        "preferredDate": "06/26/2026"
+      }
+    },
+    {
+      "speaker": "assistant",
+      "text": "Got it. Are you a new patient, or have you been seen here before?",
+      "audio": "14-assistant.wav",
+      "form": {
+        "fullName": "Nikita Petrov",
+        "reasonForVisit": "Headache",
+        "dob": "06/02/2002",
+        "mobilePhone": "(415) 555-0142",
+        "preferredDate": "06/26/2026",
+        "hasInsurance": false
+      }
+    },
+    {
+      "speaker": "patient",
+      "text": "I'm a new patient",
+      "audio": "15-patient.wav",
+      "form": {
+        "fullName": "Nikita Petrov",
+        "reasonForVisit": "Headache",
+        "dob": "06/02/2002",
+        "mobilePhone": "(415) 555-0142",
+        "preferredDate": "06/26/2026",
+        "hasInsurance": false
+      }
+    },
+    {
+      "speaker": "assistant",
+      "text": "Here's what I have:\n  • Full name: Nikita Petrov\n  • Reason for visit: Headache\n  • Date of birth: 06/02/2002\n  • Mobile phone: (415) 555-0142\n  • Preferred date: 06/26/2026\n  • Insurance: No\n  • Patient type: New\n\nIs everything correct? Say 'yes' to book, or tell me what to change.",
+      "audio": "16-assistant.wav",
+      "form": {
+        "fullName": "Nikita Petrov",
+        "reasonForVisit": "Headache",
+        "dob": "06/02/2002",
+        "mobilePhone": "(415) 555-0142",
+        "preferredDate": "06/26/2026",
+        "hasInsurance": false,
+        "patientType": "New"
+      }
+    },
+    {
+      "speaker": "patient",
+      "text": "yes, that's all correct",
+      "audio": "17-patient.wav",
+      "form": {
+        "fullName": "Nikita Petrov",
+        "reasonForVisit": "Headache",
+        "dob": "06/02/2002",
+        "mobilePhone": "(415) 555-0142",
+        "preferredDate": "06/26/2026",
+        "hasInsurance": false,
+        "patientType": "New"
+      }
+    },
+    {
+      "speaker": "assistant",
+      "text": "You're booked, Nikita! Your confirmation number is CLN-K94SDO. We'll see you on Friday, June 26, 2026. Is there anything else?",
+      "audio": "18-assistant.wav",
+      "form": {
+        "fullName": "Nikita Petrov",
+        "reasonForVisit": "Headache",
+        "dob": "06/02/2002",
+        "mobilePhone": "(415) 555-0142",
+        "preferredDate": "06/26/2026",
+        "hasInsurance": false,
+        "patientType": "New"
+      }
+    }
+  ]
+}

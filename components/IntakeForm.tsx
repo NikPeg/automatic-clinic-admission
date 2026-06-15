@@ -1,0 +1,75 @@
+"use client";
+
+const FIELDS: { key: string; label: string }[] = [
+  { key: "fullName", label: "Full name" },
+  { key: "reasonForVisit", label: "Reason for visit" },
+  { key: "dob", label: "Date of birth" },
+  { key: "mobilePhone", label: "Phone" },
+  { key: "preferredDate", label: "Preferred date" },
+  { key: "hasInsurance", label: "Insurance" },
+  { key: "patientType", label: "Patient type" },
+];
+
+function display(v: unknown): string {
+  if (typeof v === "boolean") return v ? "Yes" : "No";
+  return String(v);
+}
+
+export function IntakeForm({
+  form,
+  confirmation,
+}: {
+  form: Record<string, unknown>;
+  confirmation: string | null;
+}) {
+  const filled = FIELDS.filter((f) => form[f.key] != null).length;
+  const pct = Math.round((filled / FIELDS.length) * 100);
+
+  return (
+    <section className="h-full rounded-2xl border border-[var(--color-line)] bg-white p-6 shadow-sm">
+      <div className="mb-5 flex items-end justify-between">
+        <div>
+          <h2 className="text-sm font-semibold">Patient intake</h2>
+          <p className="text-xs text-[var(--color-muted)]">Fills in as the conversation goes</p>
+        </div>
+        <span className="text-xs font-medium tabular-nums text-[var(--color-muted)]">
+          {filled} / {FIELDS.length}
+        </span>
+      </div>
+
+      <div className="mb-5 h-1 w-full overflow-hidden rounded-full bg-[var(--color-line)]">
+        <div
+          className="h-full rounded-full bg-[var(--color-accent)] transition-all duration-500 ease-out"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+
+      <dl className="divide-y divide-[var(--color-line)]">
+        {FIELDS.map((f) => {
+          const v = form[f.key];
+          const has = v != null && v !== "";
+          return (
+            <div key={f.key} className="flex items-baseline justify-between gap-4 py-3">
+              <dt className="text-sm text-[var(--color-muted)]">{f.label}</dt>
+              {has ? (
+                <dd key={display(v)} className="field-in flex items-center gap-2 text-sm font-medium tabular-nums">
+                  <span className="size-1.5 rounded-full bg-[var(--color-accent)]" />
+                  {display(v)}
+                </dd>
+              ) : (
+                <dd className="text-sm text-slate-300">—</dd>
+              )}
+            </div>
+          );
+        })}
+      </dl>
+
+      {confirmation && (
+        <div className="field-in mt-5 rounded-xl border border-[var(--color-accent)]/30 bg-[var(--color-accent-soft)] p-4">
+          <p className="text-xs font-medium text-[var(--color-accent)]">Appointment booked</p>
+          <p className="mt-0.5 text-sm font-semibold tabular-nums">Confirmation {confirmation}</p>
+        </div>
+      )}
+    </section>
+  );
+}
