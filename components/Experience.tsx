@@ -50,6 +50,7 @@ export function Experience() {
   const silenceStartRef = useRef<number | null>(null);
   const lastTsRef = useRef(0);
   const ttsAudioRef = useRef<HTMLAudioElement | null>(null);
+  const speakEpochRef = useRef(0); // bumped to cancel any in-flight/playing TTS
   const statusRef = useRef<LiveStatus>("idle");
 
   function setStatus(s: LiveStatus) {
@@ -120,21 +121,42 @@ export function Experience() {
     return new Promise((resolve) => {
       const a = new Audio(`data:audio/wav;base64,${b64}`);
       ttsAudioRef.current = a;
-      a.onended = () => resolve();
-      a.onerror = () => resolve();
-      a.play().catch(() => resolve());
+      let done = false;
+      const fin = () => {
+        if (!done) {
+          done = true;
+          resolve();
+        }
+      };
+      // Resolve on end OR on pause — so interrupting (pause) unblocks the await.
+      a.onended = fin;
+      a.onerror = fin;
+      a.onpause = fin;
+      a.play().catch(fin);
     });
   }
+  /** Stop any current/in-flight TTS so two replies can never play at once. */
+  function interruptSpeech() {
+    speakEpochRef.current++;
+    ttsAudioRef.current?.pause();
+    ttsAudioRef.current = null;
+    speakingRef.current = false;
+  }
   async function speak(text: string) {
+    interruptSpeech(); // cancel whatever was playing/loading
+    const myEpoch = speakEpochRef.current;
     setStatus("speaking");
     speakingRef.current = true;
     try {
       const r = await fetch("/api/speak", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
       const { audioBase64 } = await r.json();
+      if (myEpoch !== speakEpochRef.current) return; // interrupted while fetching
       if (audioBase64) await playB64(audioBase64);
     } catch {}
-    speakingRef.current = false;
-    if (sessionRef.current) setStatus("listening");
+    if (myEpoch === speakEpochRef.current) {
+      speakingRef.current = false;
+      if (sessionRef.current) setStatus("listening");
+    }
   }
 
   async function startLive() {
@@ -211,8 +233,7 @@ export function Experience() {
     if (st === "speaking") {
       // barge-in: talk over the assistant to interrupt.
       if (rms > BARGE_IN) {
-        ttsAudioRef.current?.pause();
-        speakingRef.current = false;
+        interruptSpeech();
         beginCapture();
       }
     } else if (st === "listening" || st === "capturing") {
@@ -276,6 +297,7 @@ export function Experience() {
     sessionRef.current = false;
     capturingRef.current = false;
     speakingRef.current = false;
+    speakEpochRef.current++; // invalidate any in-flight speak()
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     ttsAudioRef.current?.pause();
     procRef.current?.disconnect();
@@ -303,8 +325,7 @@ export function Experience() {
   function micAction() {
     const st = statusRef.current;
     if (st === "speaking") {
-      ttsAudioRef.current?.pause();
-      speakingRef.current = false;
+      interruptSpeech();
       beginCapture();
     } else if (st === "capturing") {
       void endUtterance();

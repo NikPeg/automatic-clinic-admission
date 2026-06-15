@@ -177,8 +177,12 @@ export async function transcribeBytes(
   }
   const res = await postJson("/audio/transcriptions", {
     model: config.sttModel(),
-    // Force English so US names aren't transcribed into other scripts.
+    // Force English + a domain hint so accented/short English ("my heart") isn't
+    // transcribed into Russian/other scripts ("май харт").
     language,
+    prompt:
+      "English-speaking patient talking to a US medical clinic intake assistant. " +
+      "Transcribe in English.",
     input_audio: { data: data.toString("base64"), format },
   });
   const json = (await res.json()) as { text?: string };
