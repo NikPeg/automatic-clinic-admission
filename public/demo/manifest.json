@@ -3,7 +3,7 @@
     "assistant": "Kore",
     "patient": "Puck"
   },
-  "confirmation": "CLN-K94SDO",
+  "confirmation": "CLN-FOZSJJ",
   "steps": [
     {
       "speaker": "assistant",
@@ -35,7 +35,7 @@
     },
     {
       "speaker": "assistant",
-      "text": "Got it. What's your date of birth?",
+      "text": "Perfect. What's your date of birth?",
       "audio": "04-assistant.wav",
       "form": {
         "fullName": "Nikita Petrov",
@@ -73,7 +73,7 @@
     },
     {
       "speaker": "assistant",
-      "text": "Got it. What day would you like to come in?",
+      "text": "Thanks. What day would you like to come in?",
       "audio": "08-assistant.wav",
       "form": {
         "fullName": "Nikita Petrov",
@@ -117,7 +117,7 @@
     },
     {
       "speaker": "assistant",
-      "text": "Got it. Do you have health insurance?",
+      "text": "Perfect. Do you have health insurance?",
       "audio": "12-assistant.wav",
       "form": {
         "fullName": "Nikita Petrov",
@@ -129,7 +129,7 @@
     },
     {
       "speaker": "patient",
-      "text": "no, I don't have insurance",
+      "text": "yes, I do have insurance",
       "audio": "13-patient.wav",
       "form": {
         "fullName": "Nikita Petrov",
@@ -141,7 +141,7 @@
     },
     {
       "speaker": "assistant",
-      "text": "Got it. Are you a new patient, or have you been seen here before?",
+      "text": "Great. Who's your insurance carrier? For example, Aetna, Blue Cross Blue Shield, UnitedHealthcare, or Cigna.",
       "audio": "14-assistant.wav",
       "form": {
         "fullName": "Nikita Petrov",
@@ -149,12 +149,12 @@
         "dob": "06/02/2002",
         "mobilePhone": "(415) 555-0142",
         "preferredDate": "06/26/2026",
-        "hasInsurance": false
+        "hasInsurance": true
       }
     },
     {
       "speaker": "patient",
-      "text": "I'm a new patient",
+      "text": "Blue Cross Blue Shield",
       "audio": "15-patient.wav",
       "form": {
         "fullName": "Nikita Petrov",
@@ -162,12 +162,12 @@
         "dob": "06/02/2002",
         "mobilePhone": "(415) 555-0142",
         "preferredDate": "06/26/2026",
-        "hasInsurance": false
+        "hasInsurance": true
       }
     },
     {
       "speaker": "assistant",
-      "text": "Here's what I have:\n  • Full name: Nikita Petrov\n  • Reason for visit: Headache\n  • Date of birth: 06/02/2002\n  • Mobile phone: (415) 555-0142\n  • Preferred date: 06/26/2026\n  • Insurance: No\n  • Patient type: New\n\nIs everything correct? Say 'yes' to book, or tell me what to change.",
+      "text": "Got it. What's the member or subscriber ID on your insurance card?",
       "audio": "16-assistant.wav",
       "form": {
         "fullName": "Nikita Petrov",
@@ -175,13 +175,13 @@
         "dob": "06/02/2002",
         "mobilePhone": "(415) 555-0142",
         "preferredDate": "06/26/2026",
-        "hasInsurance": false,
-        "patientType": "New"
+        "hasInsurance": true,
+        "insuranceCarrier": "Blue Cross Blue Shield"
       }
     },
     {
       "speaker": "patient",
-      "text": "yes, that's all correct",
+      "text": "my member ID is X Z G 4 4 7 1 2 2",
       "audio": "17-patient.wav",
       "form": {
         "fullName": "Nikita Petrov",
@@ -189,13 +189,13 @@
         "dob": "06/02/2002",
         "mobilePhone": "(415) 555-0142",
         "preferredDate": "06/26/2026",
-        "hasInsurance": false,
-        "patientType": "New"
+        "hasInsurance": true,
+        "insuranceCarrier": "Blue Cross Blue Shield"
       }
     },
     {
       "speaker": "assistant",
-      "text": "You're booked, Nikita! Your confirmation number is CLN-K94SDO. We'll see you on Friday, June 26, 2026. Is there anything else?",
+      "text": "Thanks. And the group number on the card, if there is one? You can say 'none'.",
       "audio": "18-assistant.wav",
       "form": {
         "fullName": "Nikita Petrov",
@@ -203,7 +203,106 @@
         "dob": "06/02/2002",
         "mobilePhone": "(415) 555-0142",
         "preferredDate": "06/26/2026",
-        "hasInsurance": false,
+        "hasInsurance": true,
+        "insuranceCarrier": "Blue Cross Blue Shield",
+        "insuranceMemberId": "X Z G 4 4 7 1 2 2"
+      }
+    },
+    {
+      "speaker": "patient",
+      "text": "the group number is 8 8 0 1 2",
+      "audio": "19-patient.wav",
+      "form": {
+        "fullName": "Nikita Petrov",
+        "reasonForVisit": "Headache",
+        "dob": "06/02/2002",
+        "mobilePhone": "(415) 555-0142",
+        "preferredDate": "06/26/2026",
+        "hasInsurance": true,
+        "insuranceCarrier": "Blue Cross Blue Shield",
+        "insuranceMemberId": "X Z G 4 4 7 1 2 2"
+      }
+    },
+    {
+      "speaker": "assistant",
+      "text": "Great. Are you a new patient, or have you been seen here before?",
+      "audio": "20-assistant.wav",
+      "form": {
+        "fullName": "Nikita Petrov",
+        "reasonForVisit": "Headache",
+        "dob": "06/02/2002",
+        "mobilePhone": "(415) 555-0142",
+        "preferredDate": "06/26/2026",
+        "hasInsurance": true,
+        "insuranceCarrier": "Blue Cross Blue Shield",
+        "insuranceMemberId": "X Z G 4 4 7 1 2 2",
+        "insuranceGroupNumber": "88012"
+      }
+    },
+    {
+      "speaker": "patient",
+      "text": "I'm a new patient",
+      "audio": "21-patient.wav",
+      "form": {
+        "fullName": "Nikita Petrov",
+        "reasonForVisit": "Headache",
+        "dob": "06/02/2002",
+        "mobilePhone": "(415) 555-0142",
+        "preferredDate": "06/26/2026",
+        "hasInsurance": true,
+        "insuranceCarrier": "Blue Cross Blue Shield",
+        "insuranceMemberId": "X Z G 4 4 7 1 2 2",
+        "insuranceGroupNumber": "88012"
+      }
+    },
+    {
+      "speaker": "assistant",
+      "text": "Here's what I have:\n  • Full name: Nikita Petrov\n  • Reason for visit: Headache\n  • Date of birth: 06/02/2002\n  • Phone: (415) 555-0142\n  • Preferred date: 06/26/2026\n  • Insurance: Yes\n  • Insurance carrier: Blue Cross Blue Shield\n  • Member ID: X Z G 4 4 7 1 2 2\n  • Group number: 88012\n  • Patient type: New\n\nIs everything correct? Say 'yes' to book, or tell me what to change.",
+      "audio": "22-assistant.wav",
+      "form": {
+        "fullName": "Nikita Petrov",
+        "reasonForVisit": "Headache",
+        "dob": "06/02/2002",
+        "mobilePhone": "(415) 555-0142",
+        "preferredDate": "06/26/2026",
+        "hasInsurance": true,
+        "insuranceCarrier": "Blue Cross Blue Shield",
+        "insuranceMemberId": "X Z G 4 4 7 1 2 2",
+        "insuranceGroupNumber": "88012",
+        "patientType": "New"
+      }
+    },
+    {
+      "speaker": "patient",
+      "text": "yes, that's all correct",
+      "audio": "23-patient.wav",
+      "form": {
+        "fullName": "Nikita Petrov",
+        "reasonForVisit": "Headache",
+        "dob": "06/02/2002",
+        "mobilePhone": "(415) 555-0142",
+        "preferredDate": "06/26/2026",
+        "hasInsurance": true,
+        "insuranceCarrier": "Blue Cross Blue Shield",
+        "insuranceMemberId": "X Z G 4 4 7 1 2 2",
+        "insuranceGroupNumber": "88012",
+        "patientType": "New"
+      }
+    },
+    {
+      "speaker": "assistant",
+      "text": "You're booked, Nikita! Your confirmation number is CLN-FOZSJJ. We'll see you on Friday, June 26, 2026. Is there anything else?",
+      "audio": "24-assistant.wav",
+      "form": {
+        "fullName": "Nikita Petrov",
+        "reasonForVisit": "Headache",
+        "dob": "06/02/2002",
+        "mobilePhone": "(415) 555-0142",
+        "preferredDate": "06/26/2026",
+        "hasInsurance": true,
+        "insuranceCarrier": "Blue Cross Blue Shield",
+        "insuranceMemberId": "X Z G 4 4 7 1 2 2",
+        "insuranceGroupNumber": "88012",
         "patientType": "New"
       }
     }

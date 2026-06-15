@@ -546,12 +546,26 @@ export function validate(state: IntakeStateType): Partial<IntakeStateType> {
   return { form: { ...state.form, [field.key]: res.value }, clarification: null, extracted: null };
 }
 
+// Varied acknowledgements so the assistant doesn't sound like a broken record.
+const ADVANCE_PREFIX: Partial<Record<string, string>> = {
+  dob: "Perfect. ",
+  mobilePhone: "Got it. ",
+  preferredDate: "Thanks. ",
+  hasInsurance: "Perfect. ",
+  insuranceCarrier: "Great. ",
+  insuranceMemberId: "Got it. ",
+  insuranceGroupNumber: "Thanks. ",
+  patientType: "Great. ",
+};
+
 export function advance(state: IntakeStateType): Partial<IntakeStateType> {
   const field = nextField(state.form);
   if (!field) return {}; // router → review
   const first = firstNameOf(state.form.fullName);
   // Address the patient by name when we move on to the reason for the visit.
-  const prefix = field.key === "reasonForVisit" && first ? `Thanks, ${first}! ` : "Got it. ";
+  const prefix = field.key === "reasonForVisit" && first
+    ? `Thanks, ${first}! `
+    : ADVANCE_PREFIX[field.key] ?? "Got it. ";
   const msg = `${prefix}${field.question}`;
   return { currentField: field.key, clarification: null, assistantMessage: msg, messages: [asMsg(msg)] };
 }

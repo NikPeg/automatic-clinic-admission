@@ -366,13 +366,13 @@ export function Experience() {
           <button
             onClick={toggleDemo}
             disabled={steps.length === 0}
-            className="inline-flex items-center gap-2 rounded-full bg-[var(--color-accent)] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 disabled:opacity-40"
+            className={`inline-flex items-center gap-2 rounded-full bg-[var(--color-accent)] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 disabled:opacity-40${!demoPlaying && !demoDone && steps.length > 0 ? " cta-attract" : ""}`}
           >
             {demoPlaying ? <><PauseIcon /> Pause demo</> : <><PlayIcon /> {demoDone ? "Replay demo" : "Play demo"}</>}
           </button>
           <button
             onClick={handleTalk}
-            className="inline-flex items-center gap-2 rounded-full border border-[var(--color-line)] bg-white px-6 py-3 text-sm font-semibold transition hover:bg-slate-50"
+            className={`inline-flex items-center gap-2 rounded-full border border-[var(--color-line)] bg-white px-6 py-3 text-sm font-semibold transition hover:bg-slate-50${demoDone && !demoPlaying ? " cta-attract" : ""}`}
           >
             <MicIcon /> Talk to it yourself
           </button>
@@ -388,6 +388,7 @@ export function Experience() {
           micBtnRef={micBtnRef}
           onMic={micAction}
           onEnd={() => {}}
+          onRestart={reset}
           demo={{ playing: demoPlaying, idx: demoIdx, total: steps.length, toggle: toggleDemo }}
         />
         <IntakeForm form={form} confirmation={confirmation} />
@@ -421,6 +422,7 @@ function CallPanel({
   micBtnRef,
   onMic,
   onEnd,
+  onRestart,
   demo,
 }: {
   mode: Mode;
@@ -430,13 +432,14 @@ function CallPanel({
   micBtnRef: React.RefObject<HTMLButtonElement | null>;
   onMic: () => void;
   onEnd: () => void;
+  onRestart: () => void;
   demo: { playing: boolean; idx: number; total: number; toggle: () => void };
 }) {
   const live = mode === "live";
   const dot = mode === "idle" ? "bg-slate-300" : live ? "bg-red-500" : "bg-[var(--color-accent)]";
   const label = mode === "idle" ? "Not started" : live ? "On a call" : "Playing demo";
   const micColor =
-    liveStatus === "capturing" ? "bg-red-500" : liveStatus === "thinking" ? "bg-amber-500" : liveStatus === "speaking" ? "bg-slate-400" : "bg-[var(--color-accent)]";
+    liveStatus === "thinking" ? "bg-amber-500" : liveStatus === "speaking" ? "bg-slate-400" : "bg-[var(--color-accent)]";
 
   return (
     <section className="flex h-[26rem] flex-col overflow-hidden rounded-2xl border border-[var(--color-line)] bg-white shadow-sm lg:h-full">
@@ -487,6 +490,16 @@ function CallPanel({
           </button>
         </div>
       )}
+      {mode === "idle" && lines.length > 0 && (
+        <div className="flex items-center justify-center border-t border-[var(--color-line)] px-5 py-4">
+          <button
+            onClick={onRestart}
+            className="inline-flex items-center gap-2 rounded-full border border-[var(--color-line)] bg-white px-5 py-2.5 text-sm font-semibold transition hover:bg-slate-50"
+          >
+            <RestartIcon /> New registration
+          </button>
+        </div>
+      )}
       {mode === "demo" && demo.total > 0 && (
         <div className="flex items-center gap-3 border-t border-[var(--color-line)] px-5 py-4">
           <button onClick={demo.toggle} className="grid size-12 shrink-0 place-items-center rounded-full bg-[var(--color-accent)] text-white transition hover:brightness-110">
@@ -505,6 +518,12 @@ function CallPanel({
 
 const PlayIcon = () => <svg viewBox="0 0 24 24" className="size-4" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>;
 const PauseIcon = () => <svg viewBox="0 0 24 24" className="size-4" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z" /></svg>;
+const RestartIcon = () => (
+  <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+    <path d="M3 3v5h5" />
+  </svg>
+);
 const MicIcon = () => (
   <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" />

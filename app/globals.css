@@ -85,10 +85,27 @@ button:active {
   animation: mic-halo 1.6s var(--ease-out) infinite;
 }
 
+/* CTA beacon: ring expands and fades in the first ~1 s, button rests for 2 s. */
+@keyframes cta-attract {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 50%, transparent);
+  }
+  30% {
+    box-shadow: 0 0 0 12px color-mix(in srgb, var(--color-accent) 0%, transparent);
+  }
+  30.01%, 100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+.cta-attract {
+  animation: cta-attract 3s ease-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .field-in,
   .msg-in,
-  .mic-halo {
+  .mic-halo,
+  .cta-attract {
     animation: none;
   }
   button:active {

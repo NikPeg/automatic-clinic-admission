@@ -9,7 +9,7 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { speak, config } from "./openrouter.ts";
+import { speakResilient, config } from "./openrouter.ts";
 
 const DIR = ".cache/tts";
 
@@ -22,7 +22,7 @@ export async function speakCached(text: string, opts: { voice?: string } = {}): 
   const voice = opts.voice ?? config.ttsVoice;
   const file = join(DIR, `${keyFor(text, voice)}.pcm`);
   if (existsSync(file)) return readFile(file);
-  const pcm = await speak(text, { voice });
+  const pcm = await speakResilient(text, { voice });
   await mkdir(DIR, { recursive: true });
   await writeFile(file, pcm);
   return pcm;
