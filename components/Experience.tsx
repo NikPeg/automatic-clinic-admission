@@ -16,6 +16,10 @@ const MIN_SPEECH_MS = 140; // ignore blips shorter than this
 const BARGE_IN = 0.06; // talk over the assistant to interrupt it
 const PREROLL_FRAMES = 4; // keep ~0.3s before onset so word starts aren't clipped
 
+// Sub-path the app is served under (e.g. "/clinic-intake" in production).
+// fetch() and public assets aren't auto-prefixed by Next's basePath, so we do it.
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export function Experience() {
   const [form, setForm] = useState<Record<string, unknown>>({});
   const [lines, setLines] = useState<Line[]>([]);
@@ -59,7 +63,7 @@ export function Experience() {
   }
 
   useEffect(() => {
-    fetch("/demo/manifest.json").then((r) => r.json()).then((m) => setSteps(m.steps ?? [])).catch(() => {});
+    fetch(`${BASE}/demo/manifest.json`).then((r) => r.json()).then((m) => setSteps(m.steps ?? [])).catch(() => {});
     return () => teardownLive();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -78,7 +82,7 @@ export function Experience() {
   // ---------------- demo ----------------
   function playClip(file: string): Promise<void> {
     return new Promise((resolve) => {
-      const a = new Audio(`/demo/${file}`);
+      const a = new Audio(`${BASE}/demo/${file}`);
       audioRef.current = a;
       a.onended = () => resolve();
       a.onerror = () => resolve();
@@ -148,7 +152,7 @@ export function Experience() {
     setStatus("speaking");
     speakingRef.current = true;
     try {
-      const r = await fetch("/api/speak", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
+      const r = await fetch(`${BASE}/api/speak`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
       const { audioBase64 } = await r.json();
       if (myEpoch !== speakEpochRef.current) return; // interrupted while fetching
       if (audioBase64) await playB64(audioBase64);
@@ -165,7 +169,7 @@ export function Experience() {
     setMode("live");
     setStatus("connecting");
     try {
-      const r = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) });
+      const r = await fetch(`${BASE}/api/chat`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) });
       const data = await r.json();
       stateRef.current = data.state;
       setForm(data.state.form);
@@ -275,13 +279,13 @@ export function Experience() {
     silenceStartRef.current = null;
     const wavB64 = encodeWavB64(chunks, ctxRef.current?.sampleRate ?? 48000);
     try {
-      const t = await (await fetch("/api/transcribe", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ audioBase64: wavB64, format: "wav" }) })).json();
+      const t = await (await fetch(`${BASE}/api/transcribe`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ audioBase64: wavB64, format: "wav" }) })).json();
       if (!t.text) {
         if (sessionRef.current) setStatus("listening");
         return;
       }
       setLines((p) => [...p, { role: "patient", text: t.text }]);
-      const r = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ state: stateRef.current, userInput: t.text }) });
+      const r = await fetch(`${BASE}/api/chat`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ state: stateRef.current, userInput: t.text }) });
       const data = await r.json();
       stateRef.current = data.state;
       setForm(data.state.form);
