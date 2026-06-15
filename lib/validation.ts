@@ -6,12 +6,17 @@
  * can't be coerced into a valid value. `isX` returns a boolean.
  */
 
-/** "(415) 555-0142" from anything containing 10 US digits (drops a leading 1). */
+/**
+ * Normalize a phone number. US 10-digit (or 11 with a leading 1) → "(XXX) XXX-XXXX".
+ * Otherwise treated as international E.164 (8–15 digits) → "+<digits>". Null if neither.
+ */
 export function normalizePhone(input: string): string | null {
-  let digits = input.replace(/\D/g, "");
-  if (digits.length === 11 && digits.startsWith("1")) digits = digits.slice(1);
-  if (digits.length !== 10) return null;
-  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+  const digits = input.replace(/\D/g, "");
+  const us = (d: string) => `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
+  if (digits.length === 10) return us(digits);
+  if (digits.length === 11 && digits.startsWith("1")) return us(digits.slice(1));
+  if (digits.length >= 8 && digits.length <= 15) return `+${digits}`;
+  return null;
 }
 
 export function isValidPhone(input: string): boolean {

@@ -68,25 +68,40 @@ conversation (orchestrated by **LangGraph.js**), and text-to-speech for the repl
 
 ## Tech stack (and why)
 
-Choices follow the most recent **Stack Overflow Developer Survey** (TypeScript, React,
-Next.js, and Tailwind CSS remain the most widely used web technologies) and the design
-skills installed in this repo. All AI runs through **OpenRouter**.
+Choices follow the most recent **Stack Overflow Developer Survey** — TypeScript, React,
+Next.js and Tailwind remain the most widely used web technologies — kept deliberately lean.
 
-| Concern              | Choice                                                       |
-| -------------------- | ------------------------------------------------------------ |
-| Language             | TypeScript                                                   |
-| Framework            | Next.js (App Router) + React                                 |
-| Backend              | Next.js Route Handlers — minimal, no separate server         |
-| Mic capture / audio  | Browser `MediaRecorder` + Web Audio (playback)               |
-| Speech-to-text       | OpenRouter `/audio/transcriptions` (`openai/gpt-4o-transcribe`) |
-| LLM brain            | LangGraph.js + LangChain.js → OpenRouter (`anthropic/claude-opus-4.8`) |
-| Text-to-speech       | OpenRouter `/audio/speech` (`google/gemini-3.1-flash-tts-preview`) |
-| Styling              | Tailwind CSS                                                 |
-| Components           | shadcn/ui (Radix primitives)                                 |
-| Animation            | Motion (Framer Motion), Sonner (toasts), Vaul (drawer)       |
-| Forms / validation   | react-hook-form + Zod                                        |
+| Concern             | Choice                                                            |
+| ------------------- | ---------------------------------------------------------------- |
+| Language            | TypeScript                                                       |
+| Framework           | Next.js (App Router) + React 19 — frontend **and** the minimal API in one app |
+| Backend             | Next.js Route Handlers (`app/api/*`) — no separate server, no database |
+| Agent orchestration | **LangGraph.js** — the intake is a small state machine (collect → validate → confirm → submit) |
+| Validation          | Zod (one schema drives extraction + final checks)                |
+| Styling             | Tailwind CSS v4                                                  |
+| UI / motion         | Hand-built React components + CSS transitions (no component lib) — keeps it light and un-templated |
+| Browser audio       | `getUserMedia` + Web Audio (VAD, mic capture, WAV encoding) and `<audio>` playback |
+| Voice + AI          | **OpenRouter** for everything (STT, the LLM, TTS) — see below     |
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full rationale.
+Why LangGraph: the conversation has real branching (spell-by-letter, date confirmation,
+phone yes/no, insurance follow-ups, farewell) that's far clearer as an explicit graph than
+as ad-hoc `if`s. The assistant's wording is **fixed templates**, not model-generated — the
+model is only used to *understand* the patient and to *speak*, which keeps replies fast.
+
+### How the models are used (all via OpenRouter)
+
+One OpenRouter key + base URL (OpenAI-compatible) is called from the server for three roles.
+Every model id is set in `.env` and swappable without code changes:
+
+| Role                                   | OpenRouter endpoint        | Default model (`.env`)                        |
+| -------------------------------------- | -------------------------- | --------------------------------------------- |
+| Understand the patient + extract fields | `/chat/completions`        | `deepseek/deepseek-v4-pro` (cheap for dev; switch to `anthropic/claude-opus-4.8` for production) |
+| Speech-to-text                          | `/audio/transcriptions`    | `openai/gpt-4o-transcribe` (English forced)   |
+| Text-to-speech                          | `/audio/speech`            | `google/gemini-3.1-flash-tts-preview` (voice `Kore`) |
+
+Fixed assistant phrases are pre-rendered/cached, and the landing **demo** is fully
+pre-recorded — so neither pays model latency at runtime. See
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full rationale.
 
 ## Specification
 

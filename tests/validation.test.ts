@@ -9,16 +9,21 @@ import {
 } from "../lib/validation.ts";
 import { IntakeSchema, applicableRequiredFields } from "../lib/schema.ts";
 
-test("normalizePhone formats 10 digits and strips a leading 1", () => {
+test("normalizePhone formats US 10-digit (and strips a leading 1)", () => {
   assert.equal(normalizePhone("4155550142"), "(415) 555-0142");
   assert.equal(normalizePhone("415-555-0142"), "(415) 555-0142");
   assert.equal(normalizePhone("+1 (415) 555-0142"), "(415) 555-0142");
   assert.equal(normalizePhone("my number is 415.555.0142"), "(415) 555-0142");
 });
 
-test("normalizePhone rejects wrong-length input", () => {
-  assert.equal(normalizePhone("555-0142"), null);
-  assert.equal(normalizePhone("12345678901234"), null);
+test("normalizePhone accepts international (E.164) numbers", () => {
+  assert.equal(normalizePhone("+44 20 7946 0958"), "+442079460958");
+  assert.equal(normalizePhone("+107254309"), "+107254309");
+});
+
+test("normalizePhone rejects too-short / too-long input", () => {
+  assert.equal(normalizePhone("555-0142"), null); // 7 digits
+  assert.equal(normalizePhone("1234567890123456"), null); // 16 digits
 });
 
 test("normalizeDob accepts real past dates in many shapes", () => {

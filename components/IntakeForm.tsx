@@ -1,12 +1,16 @@
 "use client";
 
-const FIELDS: { key: string; label: string }[] = [
+// `insured` rows only appear once the patient says they have insurance.
+const FIELDS: { key: string; label: string; insured?: boolean }[] = [
   { key: "fullName", label: "Full name" },
   { key: "reasonForVisit", label: "Reason for visit" },
   { key: "dob", label: "Date of birth" },
   { key: "mobilePhone", label: "Phone" },
   { key: "preferredDate", label: "Preferred date" },
   { key: "hasInsurance", label: "Insurance" },
+  { key: "insuranceCarrier", label: "Insurance carrier", insured: true },
+  { key: "insuranceMemberId", label: "Member ID", insured: true },
+  { key: "insuranceGroupNumber", label: "Group number", insured: true },
   { key: "patientType", label: "Patient type" },
 ];
 
@@ -22,8 +26,10 @@ export function IntakeForm({
   form: Record<string, unknown>;
   confirmation: string | null;
 }) {
-  const filled = FIELDS.filter((f) => form[f.key] != null).length;
-  const pct = Math.round((filled / FIELDS.length) * 100);
+  // Insurance-detail rows apply only when the patient has insurance.
+  const visible = FIELDS.filter((f) => !f.insured || form.hasInsurance === true);
+  const filled = visible.filter((f) => form[f.key] != null && form[f.key] !== "").length;
+  const pct = Math.round((filled / visible.length) * 100);
 
   return (
     <section className="h-full overflow-y-auto rounded-2xl border border-[var(--color-line)] bg-white p-6 shadow-sm">
@@ -33,7 +39,7 @@ export function IntakeForm({
           <p className="text-xs text-[var(--color-muted)]">Fills in as the conversation goes</p>
         </div>
         <span className="text-xs font-medium tabular-nums text-[var(--color-muted)]">
-          {filled} / {FIELDS.length}
+          {filled} / {visible.length}
         </span>
       </div>
 
@@ -45,7 +51,7 @@ export function IntakeForm({
       </div>
 
       <dl className="divide-y divide-[var(--color-line)]">
-        {FIELDS.map((f) => {
+        {visible.map((f) => {
           const v = form[f.key];
           const has = v != null && v !== "";
           return (

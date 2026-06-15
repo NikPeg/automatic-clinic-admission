@@ -27,7 +27,10 @@ const PATIENT_TURNS = [
   "yes, this phone is fine",
   "next Friday",
   "yes",
-  "no, I don't have insurance",
+  "yes, I do have insurance",
+  "Blue Cross Blue Shield",
+  "my member ID is X Z G 4 4 7 1 2 2",
+  "the group number is 8 8 0 1 2",
   "I'm a new patient",
   "yes, that's all correct",
 ];

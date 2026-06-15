@@ -51,8 +51,10 @@ const firstNameOf = (full: unknown): string =>
 
 /** First not-yet-addressed field. */
 export function nextField(form: PartialIntake): FieldSpec | null {
-  return FIELDS.find((f) => !(f.key in form)) ?? null;
+  return FIELDS.find((f) => !(f.key in form) && (!f.askWhen || f.askWhen(form))) ?? null;
 }
+
+const SKIP_WORDS = new Set(["none", "no", "skip", "n/a", "na", "nope", "no thanks"]);
 
 // ---------------------------------------------------------------------------
 // Normalization for non-name fields (names get the spell/confirm flow below).
@@ -423,7 +425,7 @@ function validatePhone(state: IntakeStateType, field: FieldSpec): Partial<Intake
     const n = normalizePhone(ui);
     if (n) return accept(n);
     return askDigits(
-      "That doesn't look like a valid US number. Please give a 10-digit US number, like 415-555-0142.",
+      "That doesn't look like a valid number. Please give a number like 415-555-0142, or an international number including the country code.",
     );
   }
 
@@ -442,7 +444,7 @@ function validatePhone(state: IntakeStateType, field: FieldSpec): Partial<Intake
   if (yn === false || wantsOther || looksLikeNumberAttempt) {
     return askDigits(
       looksLikeNumberAttempt
-        ? "That doesn't look like a 10-digit US number. What's the best US number to reach you? For example, 415-555-0142."
+        ? "That doesn't look like a complete number. What's the best number to reach you? For example, 415-555-0142, or include the country code for an international number."
         : "No problem — what number should we use?",
     );
   }
@@ -524,6 +526,13 @@ export function validate(state: IntakeStateType): Partial<IntakeStateType> {
   if (fieldKind(field.key) === "apptdate") return validateDate(state, field);
 
   const ex = state.extracted!;
+
+  // Optional field the patient declined / said "none" → record null and move on.
+  const valStr = ex.value == null ? "" : String(ex.value).trim().toLowerCase();
+  if (!field.required && (!ex.provided || SKIP_WORDS.has(valStr))) {
+    return { form: { ...state.form, [field.key]: null }, clarification: null, extracted: null };
+  }
+
   if (!ex.provided) {
     const msg = clarifyText(field, "reask");
     return { assistantMessage: msg, messages: [asMsg(msg)], clarification: { kind: "reask", fieldKey: field.key } };

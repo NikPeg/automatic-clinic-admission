@@ -64,12 +64,9 @@ test("phone: a number said directly at the yes/no stage is accepted", () => {
   assert.equal(r.form?.mobilePhone, "(415) 555-0123");
 });
 
-test("phone: an invalid number attempt asks for a valid US number (not the yes/no prompt)", () => {
-  const r = validate(st({ currentField: "mobilePhone", userInput: "you can use +107254309" }));
-  assert.equal(r.form, undefined);
-  assert.equal(r.clarification?.kind, "ask_phone_digits");
-  assert.match(r.assistantMessage ?? "", /US number/i);
-  assert.doesNotMatch(r.assistantMessage ?? "", /calling from/i);
+test("phone: an international number is accepted directly", () => {
+  const r = validate(st({ currentField: "mobilePhone", userInput: "you can use +44 20 7946 0958" }));
+  assert.equal(r.form?.mobilePhone, "+442079460958");
 });
 
 test("phone: 'a different number' moves to collecting the number", () => {
@@ -77,17 +74,23 @@ test("phone: 'a different number' moves to collecting the number", () => {
   assert.equal(r.clarification?.kind, "ask_phone_digits");
 });
 
-test("phone digit stage: an invalid number re-asks with a format hint, not the yes/no prompt", () => {
+test("phone digit stage: a too-short number re-asks (not the yes/no prompt)", () => {
   const r = validate(
     st({
       currentField: "mobilePhone",
       clarification: { kind: "ask_phone_digits", fieldKey: "mobilePhone" },
-      userInput: "+107254309",
+      userInput: "12345",
     }),
   );
   assert.equal(r.form, undefined);
   assert.equal(r.clarification?.kind, "ask_phone_digits");
   assert.doesNotMatch(r.assistantMessage ?? "", /calling from/i);
+});
+
+test("insurance: insured patients are asked carrier/member id; uninsured skip them", () => {
+  const base = { fullName: "A B", reasonForVisit: "x", dob: "05/14/1990", mobilePhone: "(415) 555-0142", preferredDate: "06/26/2026" };
+  assert.equal(nextField({ ...base, hasInsurance: true })?.key, "insuranceCarrier");
+  assert.equal(nextField({ ...base, hasInsurance: false })?.key, "patientType");
 });
 
 test("DOB rejects an impossible date (no model can 'fix' it)", () => {
