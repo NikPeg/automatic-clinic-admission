@@ -407,26 +407,47 @@ function validatePhone(state: IntakeStateType, field: FieldSpec): Partial<Intake
   const ui = state.userInput ?? "";
   const clar = state.clarification?.kind;
 
+  const askDigits = (msg: string): Partial<IntakeStateType> => ({
+    assistantMessage: msg,
+    messages: [asMsg(msg)],
+    clarification: { kind: "ask_phone_digits", fieldKey: field.key },
+  });
+  const accept = (value: string): Partial<IntakeStateType> => ({
+    form: { ...state.form, [field.key]: value },
+    clarification: null,
+    extracted: null,
+  });
+
+  // They're dictating digits (said "no" / "a different number" earlier).
   if (clar === "ask_phone_digits") {
-    const ex = state.extracted;
-    const res = normalizeField("mobilePhone", ex?.provided ? ex.value : ui);
-    if (res.ok) return { form: { ...state.form, [field.key]: res.value }, clarification: null, extracted: null };
-    const msg = clarifyText(field, "bad_format");
-    return { assistantMessage: msg, messages: [asMsg(msg)], clarification: { kind: "ask_phone_digits", fieldKey: field.key } };
+    const n = normalizePhone(ui);
+    if (n) return accept(n);
+    return askDigits(
+      "That doesn't look like a valid US number. Please give a 10-digit US number, like 415-555-0142.",
+    );
   }
 
-  // Yes/no stage. If they simply said a number, just take it.
+  // Yes/no stage. A valid US number → take it straight away.
   const direct = normalizePhone(ui);
-  if (direct) return { form: { ...state.form, [field.key]: direct }, clarification: null, extracted: null };
+  if (direct) return accept(direct);
 
   const yn = parseYesNo(ui);
-  if (yn === true) {
-    return { form: { ...state.form, [field.key]: CALLER_NUMBER }, clarification: null, extracted: null };
+  if (yn === true) return accept(CALLER_NUMBER);
+
+  // "no" / "a different number" / "use my cell" → switch to collecting a number.
+  const wantsOther = /\b(different|another|other|new|change|cell|mobile|number)\b/i.test(ui);
+  // A number-looking attempt that isn't a valid US number (e.g. international).
+  const looksLikeNumberAttempt = (ui.match(/\d/g) ?? []).length >= 5;
+
+  if (yn === false || wantsOther || looksLikeNumberAttempt) {
+    return askDigits(
+      looksLikeNumberAttempt
+        ? "That doesn't look like a 10-digit US number. What's the best US number to reach you? For example, 415-555-0142."
+        : "No problem — what number should we use?",
+    );
   }
-  if (yn === false) {
-    const msg = "No problem — what number should we use?";
-    return { assistantMessage: msg, messages: [asMsg(msg)], clarification: { kind: "ask_phone_digits", fieldKey: field.key } };
-  }
+
+  // Genuinely unclear → re-ask the yes/no once.
   const msg = "Sorry — should we use the phone you're calling from? You can say yes, or give me a different number.";
   return { assistantMessage: msg, messages: [asMsg(msg)], clarification: { kind: "confirm_phone", fieldKey: field.key } };
 }

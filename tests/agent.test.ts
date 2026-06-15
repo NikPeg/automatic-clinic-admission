@@ -64,6 +64,32 @@ test("phone: a number said directly at the yes/no stage is accepted", () => {
   assert.equal(r.form?.mobilePhone, "(415) 555-0123");
 });
 
+test("phone: an invalid number attempt asks for a valid US number (not the yes/no prompt)", () => {
+  const r = validate(st({ currentField: "mobilePhone", userInput: "you can use +107254309" }));
+  assert.equal(r.form, undefined);
+  assert.equal(r.clarification?.kind, "ask_phone_digits");
+  assert.match(r.assistantMessage ?? "", /US number/i);
+  assert.doesNotMatch(r.assistantMessage ?? "", /calling from/i);
+});
+
+test("phone: 'a different number' moves to collecting the number", () => {
+  const r = validate(st({ currentField: "mobilePhone", userInput: "a different number" }));
+  assert.equal(r.clarification?.kind, "ask_phone_digits");
+});
+
+test("phone digit stage: an invalid number re-asks with a format hint, not the yes/no prompt", () => {
+  const r = validate(
+    st({
+      currentField: "mobilePhone",
+      clarification: { kind: "ask_phone_digits", fieldKey: "mobilePhone" },
+      userInput: "+107254309",
+    }),
+  );
+  assert.equal(r.form, undefined);
+  assert.equal(r.clarification?.kind, "ask_phone_digits");
+  assert.doesNotMatch(r.assistantMessage ?? "", /calling from/i);
+});
+
 test("DOB rejects an impossible date (no model can 'fix' it)", () => {
   const r = validate(
     st({ currentField: "dob", userInput: "32 02 2002", extracted: ex({ provided: true, value: "32 02 2002" }) }),
