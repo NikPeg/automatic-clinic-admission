@@ -3,12 +3,12 @@ import "dotenv/config";
 import { existsSync } from "node:fs";
 import { transcribe, config } from "../lib/openrouter.ts";
 
-const IN = process.argv[2] ?? "out.wav";
+const IN = process.argv[2] ?? ".artifacts/out.wav";
 
 async function main() {
   if (!existsSync(IN)) {
     throw new Error(
-      `Audio file "${IN}" not found. Run \`npm run ping:tts\` first to create out.wav, ` +
+      `Audio file "${IN}" not found. Run \`npm run ping:tts\` first to create it, ` +
         `or pass a path: \`npm run ping:stt -- path/to/audio.wav\`.`,
     );
   }

@@ -1,9 +1,9 @@
 /** Phase 0 — prove the TTS endpoint works. Writes out.wav. */
 import "dotenv/config";
-import { writeFile } from "node:fs/promises";
+import { writeFile, mkdir } from "node:fs/promises";
 import { speak, pcmToWav, config } from "../lib/openrouter.ts";
 
-const OUT = "out.wav";
+const OUT = ".artifacts/out.wav";
 
 async function main() {
   console.log(`→ TTS model: ${config.ttsModel()}  voice: ${config.ttsVoice}`);
@@ -12,6 +12,7 @@ async function main() {
   // Gemini TTS only supports PCM; wrap it in a WAV header so it's playable.
   const pcm = await speak(text);
   const wav = pcmToWav(pcm);
+  await mkdir(".artifacts", { recursive: true });
   await writeFile(OUT, wav);
   console.log(
     `\n✅ Wrote ${OUT} (${wav.length} bytes). Play it:\n   open ${OUT}\n`,

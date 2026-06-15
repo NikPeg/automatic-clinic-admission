@@ -288,6 +288,25 @@ export function Experience() {
     setMode("idle");
   }
 
+  /**
+   * The mic button is an *input* control, not a hang-up:
+   *  - while the assistant is asking → jump in and start answering (interrupt);
+   *  - while it's hearing you → send what you've said now;
+   *  - while idle-listening → start capturing.
+   */
+  function micAction() {
+    const st = statusRef.current;
+    if (st === "speaking") {
+      ttsAudioRef.current?.pause();
+      speakingRef.current = false;
+      beginCapture();
+    } else if (st === "capturing") {
+      void endUtterance();
+    } else if (st === "listening") {
+      beginCapture();
+    }
+  }
+
   const demoDone = demoIdx >= steps.length - 1 && steps.length > 0 && !demoPlaying;
 
   return (
@@ -318,7 +337,7 @@ export function Experience() {
             onClick={mode === "live" ? stopLive : startLive}
             className="inline-flex items-center gap-2 rounded-full border border-[var(--color-line)] bg-white px-6 py-3 text-sm font-semibold transition hover:bg-slate-50"
           >
-            <MicIcon /> {mode === "live" ? "Stop" : "Talk to it yourself"}
+            <MicIcon /> {mode === "live" ? "End call" : "Talk to it yourself"}
           </button>
         </div>
       </section>
@@ -330,7 +349,8 @@ export function Experience() {
           transcriptRef={transcriptRef}
           liveStatus={liveStatus}
           micBtnRef={micBtnRef}
-          onStop={stopLive}
+          onMic={micAction}
+          onEnd={stopLive}
           demo={{ playing: demoPlaying, idx: demoIdx, total: steps.length, toggle: toggleDemo }}
         />
         <IntakeForm form={form} confirmation={confirmation} />
@@ -345,7 +365,15 @@ const LIVE_LABEL: Record<LiveStatus, string> = {
   listening: "Listening — just speak",
   capturing: "Hearing you…",
   thinking: "Thinking…",
-  speaking: "Speaking… (talk to interrupt)",
+  speaking: "Asking… — jump in any time",
+};
+const MIC_ACTION: Record<LiveStatus, string> = {
+  idle: "",
+  connecting: "Connecting…",
+  listening: "Tap to start answering",
+  capturing: "Tap to send",
+  thinking: "Working…",
+  speaking: "Tap to answer now",
 };
 
 function CallPanel({
@@ -354,7 +382,8 @@ function CallPanel({
   transcriptRef,
   liveStatus,
   micBtnRef,
-  onStop,
+  onMic,
+  onEnd,
   demo,
 }: {
   mode: Mode;
@@ -362,7 +391,8 @@ function CallPanel({
   transcriptRef: React.RefObject<HTMLDivElement | null>;
   liveStatus: LiveStatus;
   micBtnRef: React.RefObject<HTMLButtonElement | null>;
-  onStop: () => void;
+  onMic: () => void;
+  onEnd: () => void;
   demo: { playing: boolean; idx: number; total: number; toggle: () => void };
 }) {
   const live = mode === "live";
@@ -402,19 +432,22 @@ function CallPanel({
           <div className="grid size-14 place-items-center">
             <button
               ref={micBtnRef}
-              onClick={onStop}
+              onClick={onMic}
               style={{ transition: "transform 80ms linear, background-color 200ms" }}
               className={`grid size-12 place-items-center rounded-full text-white ${micColor}`}
-              aria-label="Stop call"
-              title="Click to end the call"
+              aria-label={MIC_ACTION[liveStatus] || "Microphone"}
+              title={MIC_ACTION[liveStatus]}
             >
               <MicIcon />
             </button>
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-sm font-medium">{LIVE_LABEL[liveStatus] || "Listening…"}</p>
-            <p className="text-xs text-[var(--color-muted)]">Always listening — no need to hold. Click the mic to stop.</p>
+            <p className="text-xs text-[var(--color-muted)]">Always listening — answer whenever you're ready.</p>
           </div>
+          <button onClick={onEnd} className="ml-auto shrink-0 text-xs font-medium text-[var(--color-muted)] underline-offset-2 hover:text-[var(--color-ink)] hover:underline">
+            End call
+          </button>
         </div>
       )}
       {mode === "demo" && demo.total > 0 && (

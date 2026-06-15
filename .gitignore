@@ -13,9 +13,6 @@ yarn-error.log*
 .DS_Store
 
 # Generated artifacts
-out.wav
-out.mp3
-graph.png
-graph.mmd
+.artifacts/
 .cache/
 public/demo/*.wav
