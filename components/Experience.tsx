@@ -8,12 +8,13 @@ type Step = { speaker: "assistant" | "patient"; text: string; audio: string; for
 type Mode = "idle" | "demo" | "live";
 type LiveStatus = "idle" | "connecting" | "listening" | "capturing" | "thinking" | "speaking";
 
-// Voice-activity-detection thresholds (RMS, 0..1-ish) and timings.
-const SPEECH_ON = 0.04; // start capturing above this
-const SILENCE = 0.025; // consider quiet below this
-const SILENCE_MS = 900; // end utterance after this much trailing silence
-const MIN_SPEECH_MS = 300; // ignore blips shorter than this
-const BARGE_IN = 0.07; // talk over the assistant to interrupt it
+// Voice-activity-detection thresholds (RMS) and timings. One threshold is used
+// for both onset and end (no gray zone), so short words like "yes" finalize.
+const SPEECH_ON = 0.03; // at/above = speech; below = silence
+const SILENCE_MS = 1200; // finalize after this much trailing silence
+const MIN_SPEECH_MS = 140; // ignore blips shorter than this
+const BARGE_IN = 0.06; // talk over the assistant to interrupt it
+const PREROLL_FRAMES = 4; // keep ~0.3s before onset so word starts aren't clipped
 
 export function Experience() {
   const [form, setForm] = useState<Record<string, unknown>>({});
@@ -44,6 +45,7 @@ export function Experience() {
   const capturingRef = useRef(false);
   const speakingRef = useRef(false);
   const bufRef = useRef<Float32Array[]>([]);
+  const preRollRef = useRef<Float32Array[]>([]);
   const speechMsRef = useRef(0);
   const silenceStartRef = useRef<number | null>(null);
   const lastTsRef = useRef(0);
@@ -172,8 +174,11 @@ export function Experience() {
     source.connect(proc);
     proc.connect(ctx.destination); // required for onaudioprocess to fire
     proc.onaudioprocess = (e) => {
-      if (!capturingRef.current) return;
-      bufRef.current.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+      const frame = new Float32Array(e.inputBuffer.getChannelData(0));
+      const pr = preRollRef.current;
+      pr.push(frame);
+      if (pr.length > PREROLL_FRAMES) pr.shift();
+      if (capturingRef.current) bufRef.current.push(frame);
     };
     sessionRef.current = true;
     lastTsRef.current = performance.now();
@@ -215,7 +220,8 @@ export function Experience() {
         if (!capturingRef.current) beginCapture();
         speechMsRef.current += dt;
         silenceStartRef.current = null;
-      } else if (capturingRef.current && rms < SILENCE) {
+      } else if (capturingRef.current) {
+        // Anything at/below the threshold counts as silence — no gray zone.
         if (silenceStartRef.current == null) silenceStartRef.current = now;
         if (now - silenceStartRef.current > SILENCE_MS) {
           if (speechMsRef.current > MIN_SPEECH_MS) void endUtterance();
@@ -228,7 +234,7 @@ export function Experience() {
 
   function beginCapture() {
     capturingRef.current = true;
-    bufRef.current = [];
+    bufRef.current = [...preRollRef.current]; // include the onset we already heard
     speechMsRef.current = 0;
     silenceStartRef.current = null;
     setStatus("capturing");
@@ -342,7 +348,7 @@ export function Experience() {
         </div>
       </section>
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
+      <div className="grid gap-5 lg:h-[34rem] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
         <CallPanel
           mode={mode}
           lines={lines}
@@ -402,7 +408,7 @@ function CallPanel({
     liveStatus === "capturing" ? "bg-red-500" : liveStatus === "thinking" ? "bg-amber-500" : liveStatus === "speaking" ? "bg-slate-400" : "bg-[var(--color-accent)]";
 
   return (
-    <section className="flex h-full min-h-[24rem] flex-col rounded-2xl border border-[var(--color-line)] bg-white shadow-sm">
+    <section className="flex h-[26rem] flex-col overflow-hidden rounded-2xl border border-[var(--color-line)] bg-white shadow-sm lg:h-full">
       <div className="flex items-center gap-2 border-b border-[var(--color-line)] px-5 py-3.5">
         <span className={`size-2 rounded-full ${dot} ${mode !== "idle" ? "animate-pulse" : ""}`} />
         <span className="text-xs font-medium text-[var(--color-muted)]">{label}</span>
@@ -419,7 +425,7 @@ function CallPanel({
         ) : (
           lines.map((l, i) => (
             <div key={i} className={l.role === "assistant" ? "" : "text-right"}>
-              <span className={`inline-block max-w-[85%] rounded-2xl px-3.5 py-2 text-sm ${l.role === "assistant" ? "bg-slate-50 text-[var(--color-ink)] ring-1 ring-[var(--color-line)]" : "bg-[var(--color-accent)] text-white"}`}>
+              <span className={`msg-in inline-block max-w-[85%] rounded-2xl px-3.5 py-2 text-sm ${l.role === "assistant" ? "bg-slate-50 text-[var(--color-ink)] ring-1 ring-[var(--color-line)]" : "bg-[var(--color-accent)] text-white"}`}>
                 {l.text}
               </span>
             </div>
@@ -434,7 +440,7 @@ function CallPanel({
               ref={micBtnRef}
               onClick={onMic}
               style={{ transition: "transform 80ms linear, background-color 200ms" }}
-              className={`grid size-12 place-items-center rounded-full text-white ${micColor}`}
+              className={`grid size-12 place-items-center rounded-full text-white ${micColor} ${liveStatus === "listening" || liveStatus === "capturing" ? "mic-halo" : ""}`}
               aria-label={MIC_ACTION[liveStatus] || "Microphone"}
               title={MIC_ACTION[liveStatus]}
             >

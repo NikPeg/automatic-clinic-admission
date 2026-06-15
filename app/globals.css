@@ -4,9 +4,12 @@
   --color-canvas: #f5f7f6;
   --color-ink: #0f172a;
   --color-muted: #64748b;
-  --color-line: #e2e8f0;
+  --color-line: #e6eae8;
   --color-accent: #0d9488;
   --color-accent-soft: #f0fdfa;
+
+  /* Strong, intentional easing (built-in CSS curves are too weak). */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 html,
@@ -22,7 +25,24 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* A field's value landing as it's confirmed. */
+h1 {
+  letter-spacing: -0.022em;
+}
+
+/* Pressable feedback for every button. */
+button {
+  transition: transform 160ms var(--ease-out), background-color 200ms ease, filter 200ms ease, color 200ms ease;
+}
+button:active {
+  transform: scale(0.97);
+}
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* A field value landing as it's confirmed. */
 @keyframes field-in {
   from {
     opacity: 0;
@@ -34,11 +54,44 @@ body {
   }
 }
 .field-in {
-  animation: field-in 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: field-in 0.28s var(--ease-out);
+}
+
+/* A chat bubble entering. */
+@keyframes msg-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.msg-in {
+  animation: msg-in 0.24s var(--ease-out);
+}
+
+/* Soft listening halo behind the mic. */
+@keyframes mic-halo {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 35%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 14px color-mix(in srgb, var(--color-accent) 0%, transparent);
+  }
+}
+.mic-halo {
+  animation: mic-halo 1.6s var(--ease-out) infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .field-in {
+  .field-in,
+  .msg-in,
+  .mic-halo {
     animation: none;
+  }
+  button:active {
+    transform: none;
   }
 }

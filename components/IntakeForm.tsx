@@ -26,7 +26,7 @@ export function IntakeForm({
   const pct = Math.round((filled / FIELDS.length) * 100);
 
   return (
-    <section className="h-full rounded-2xl border border-[var(--color-line)] bg-white p-6 shadow-sm">
+    <section className="h-full overflow-y-auto rounded-2xl border border-[var(--color-line)] bg-white p-6 shadow-sm">
       <div className="mb-5 flex items-end justify-between">
         <div>
           <h2 className="text-sm font-semibold">Patient intake</h2>
