@@ -163,6 +163,12 @@ export function Experience() {
     }
   }
 
+  /** Start the call if needed, then scroll the mic into view so it's easy to find. */
+  function handleTalk() {
+    if (mode !== "live") void startLive();
+    setTimeout(() => micBtnRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 250);
+  }
+
   async function startLive() {
     teardownLive();
     reset();
@@ -314,11 +320,6 @@ export function Experience() {
     ctxRef.current = null;
     if (micBtnRef.current) micBtnRef.current.style.transform = "scale(1)";
   }
-  function stopLive() {
-    teardownLive();
-    setStatus("idle");
-    setMode("idle");
-  }
 
   /**
    * The mic button is an *input* control, not a hang-up:
@@ -365,10 +366,10 @@ export function Experience() {
             {demoPlaying ? <><PauseIcon /> Pause demo</> : <><PlayIcon /> {demoDone ? "Replay demo" : "Play demo"}</>}
           </button>
           <button
-            onClick={mode === "live" ? stopLive : startLive}
+            onClick={handleTalk}
             className="inline-flex items-center gap-2 rounded-full border border-[var(--color-line)] bg-white px-6 py-3 text-sm font-semibold transition hover:bg-slate-50"
           >
-            <MicIcon /> {mode === "live" ? "End call" : "Talk to it yourself"}
+            <MicIcon /> Talk to it yourself
           </button>
         </div>
       </section>
@@ -381,7 +382,7 @@ export function Experience() {
           liveStatus={liveStatus}
           micBtnRef={micBtnRef}
           onMic={micAction}
-          onEnd={stopLive}
+          onEnd={() => {}}
           demo={{ playing: demoPlaying, idx: demoIdx, total: steps.length, toggle: toggleDemo }}
         />
         <IntakeForm form={form} confirmation={confirmation} />
