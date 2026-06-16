@@ -366,7 +366,7 @@ export function Experience() {
           <button
             onClick={toggleDemo}
             disabled={steps.length === 0}
-            className={`inline-flex items-center gap-2 rounded-full bg-[var(--color-accent)] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 disabled:opacity-40${!demoPlaying && !demoDone && steps.length > 0 ? " cta-attract" : ""}`}
+            className={`inline-flex items-center gap-2 rounded-full bg-[var(--color-accent)] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 disabled:opacity-40${mode === "idle" && !demoPlaying && !demoDone && steps.length > 0 ? " cta-attract" : ""}`}
           >
             {demoPlaying ? <><PauseIcon /> Pause demo</> : <><PlayIcon /> {demoDone ? "Replay demo" : "Play demo"}</>}
           </button>
