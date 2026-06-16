@@ -387,7 +387,7 @@ export function Experience() {
           liveStatus={liveStatus}
           micBtnRef={micBtnRef}
           onMic={micAction}
-          onEnd={() => {}}
+          onEnd={() => { teardownLive(); setMode("idle"); }}
           onRestart={reset}
           demo={{ playing: demoPlaying, idx: demoIdx, total: steps.length, toggle: toggleDemo }}
         />
