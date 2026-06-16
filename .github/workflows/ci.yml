@@ -38,7 +38,8 @@ jobs:
           ssh -i ~/.ssh/id_ed25519 "root@$DEPLOY_HOST" '
             set -e
             cd /var/www/clinic-intake
-            git pull --ff-only
+            git fetch --prune
+            git reset --hard origin/main
             npm ci
             NEXT_PUBLIC_BASE_PATH=/clinic-intake npm run build
             systemctl restart clinic-intake
